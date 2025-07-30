@@ -1,0 +1,29 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Wed Jul 30 17:32:37 2025
+[*]
+[dumpfile] "/media/hans/external/projects/verilog/traffic_light/traffic_light_tb.vcd"
+[dumpfile_mtime] "Wed Jul 30 17:31:23 2025"
+[dumpfile_size] 2028
+[savefile] "/media/hans/external/projects/verilog/traffic_light/traffic_light_tb.gtkw"
+[timestart] 0
+[size] 1969 1060
+[pos] -1 -1
+*-16.838179 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] traffic_light_tb.
+[sst_width] 47
+[signals_width] 165
+[sst_expanded] 0
+[sst_vpaned_height] 303
+@28
+traffic_light_tb.uut.clk
+@24
+traffic_light_tb.uut.state[1:0]
+@25
+traffic_light_tb.uut.next_state[1:0]
+@28
+traffic_light_tb.uut.red
+traffic_light_tb.uut.yellow
+traffic_light_tb.uut.green
+[pattern_trace] 1
+[pattern_trace] 0
