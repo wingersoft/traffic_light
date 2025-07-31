@@ -32,6 +32,6 @@ $(WAVEFORM): all
 
 # Target to clean up generated files
 clean:
-	rm -f $(TARGET) $(WAVEFORM)
+	rm -f $(TARGET)
 
 .PHONY: all run view clean
