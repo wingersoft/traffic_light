@@ -1,4 +1,3 @@
-
 // Testbench for the traffic_light module
 
 `timescale 1ns / 1ps
@@ -9,23 +8,23 @@ module traffic_light_tb;
     reg clk;
 
     // Outputs
-    wire red;
-    wire yellow;
-    wire green;
+    wire red1, yellow1, green1;
+    wire red2, yellow2, green2;
 
     // Instantiate the module under test (UUT)
     traffic_light uut (
         .clk(clk),
-        .red(red),
-        .yellow(yellow),
-        .green(green)
+        .red1(red1),
+        .yellow1(yellow1),
+        .green1(green1),
+        .red2(red2),
+        .yellow2(yellow2),
+        .green2(green2)
     );
 
     // Override parameters for simulation
     defparam uut.GREEN_CYCLES = 10;
     defparam uut.YELLOW_CYCLES = 5;
-    defparam uut.RED_CYCLES = 15;
-
 
     // Clock generation
     initial begin
@@ -36,10 +35,11 @@ module traffic_light_tb;
     // Simulation control and monitoring
     initial begin
         $dumpfile("traffic_light_tb.vcd");
-        $dumpvars();
+        $dumpvars(0, uut);
 
         // Monitor the outputs
-        $monitor("Time = %0t, red = %b, yellow = %b, green = %b", $time, red, yellow, green);
+        $monitor("Time = %0t, Light 1: R=%b Y=%b G=%b, Light 2: R=%b Y=%b G=%b",
+                 $time, red1, yellow1, green1, red2, yellow2, green2);
 
         // Run for a certain number of cycles and then stop
         #1000 $finish;
