@@ -10,7 +10,8 @@ SOURCES = traffic_light.v traffic_light_tb.v
 
 # Output files
 TARGET = traffic_light.vvp
-WAVEFORM = traffic_light_tb.gtkw
+WAVEFORM = traffic_light_tb.vcd
+WAVEFORMVIEW = traffic_light_tb.gtkw
 
 # Default target
 all: $(TARGET)
@@ -33,5 +34,6 @@ $(WAVEFORM): all
 # Target to clean up generated files
 clean:
 	rm -f $(TARGET)
+	rm -f $(WAVEFORM)
 
 .PHONY: all run view clean
