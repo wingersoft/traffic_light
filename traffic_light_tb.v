@@ -23,7 +23,7 @@ module traffic_light_tb;
     );
 
     // Override parameters for simulation
-    defparam uut.GREEN_CYCLES = 10;
+    defparam uut.GREEN_CYCLES = 30;
     defparam uut.YELLOW_CYCLES = 5;
 
     // Clock generation
@@ -42,7 +42,7 @@ module traffic_light_tb;
                  $time, red1, yellow1, green1, red2, yellow2, green2);
 
         // Run for a certain number of cycles and then stop
-        #1000 $finish;
+        #2000 $finish;
     end
 
 endmodule

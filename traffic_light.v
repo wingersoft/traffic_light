@@ -3,7 +3,6 @@
 // Title       : traffic_light
 // Design      : traffic_light
 // Author      : 
-// Company     : 
 //
 //-----------------------------------------------------------------------------
 //
@@ -45,9 +44,9 @@ module traffic_light (
 
     // Time duration parameters in clock cycles.
     // The system clock is 50 MHz, which means one clock cycle is 20 ns.
-    // Green light duration: 10 seconds = 10 / (20 * 10^-9) = 500,000,000 cycles
+    // Green light duration: 30 seconds = 30 / (20 * 10^-9) = 1_500_000_000 cycles
     // Yellow light duration: 5 seconds = 5 / (20 * 10^-9)  = 250,000,000 cycles
-    parameter GREEN_CYCLES  = 32'd500_000_000;
+    parameter GREEN_CYCLES  = 32'd1_500_000_000;
     parameter YELLOW_CYCLES = 32'd250_000_000;
 
     // State registers to hold the current and next state of the state machine.
