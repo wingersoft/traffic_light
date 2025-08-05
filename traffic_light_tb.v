@@ -29,7 +29,7 @@ module traffic_light_tb;
     // Clock generation
     initial begin
         clk = 0;
-        forever #10 clk = ~clk; // 50 MHz clock (20 ns period)
+        forever #31.25 clk = ~clk; // 16 MHz clock (62.5 ns period)
     end
 
     // Simulation control and monitoring
@@ -42,7 +42,7 @@ module traffic_light_tb;
                  $time, red1, yellow1, green1, red2, yellow2, green2);
 
         // Run for a certain number of cycles and then stop
-        #2000 $finish;
+        #8000 $finish;
     end
 
 endmodule

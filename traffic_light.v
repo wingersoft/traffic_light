@@ -2,27 +2,23 @@
 //
 // Title       : traffic_light
 // Design      : traffic_light
-// Author      : 
+// Author      : HG and gemini
 //
 //-----------------------------------------------------------------------------
 //
 // File        : traffic_light.v
-// Generated   : 
-// From        : 
-// By          : 
-//
 //-----------------------------------------------------------------------------
 //
 // Description : Verilog module for a two-way traffic light controller.
 //               This module manages the state transitions and timings for
 //               two traffic lights at an intersection. The clock frequency
-//               is assumed to be 50 MHz.
+//               is assumed to be 16 MHz.
 //
 //-----------------------------------------------------------------------------
 
 module traffic_light (
     // Inputs
-    input wire clk,           // 50 MHz clock input
+    input wire clk,           // 16 MHz clock input
 
     // Outputs for Traffic Light 1
     output reg red1,          // Red light output
@@ -43,11 +39,11 @@ module traffic_light (
     parameter S_RED1_YELLOW2   = 2'b11; // Light 1 is Red, Light 2 is Yellow
 
     // Time duration parameters in clock cycles.
-    // The system clock is 50 MHz, which means one clock cycle is 20 ns.
-    // Green light duration: 30 seconds = 30 / (20 * 10^-9) = 1_500_000_000 cycles
-    // Yellow light duration: 5 seconds = 5 / (20 * 10^-9)  = 250,000,000 cycles
-    parameter GREEN_CYCLES  = 32'd1_500_000_000;
-    parameter YELLOW_CYCLES = 32'd250_000_000;
+    // The system clock is 16 MHz, which means one clock cycle is 62.5 ns.
+    // Green light duration: 30 seconds = 30 / (62.5 * 10^-9) = 480,000,000 cycles
+    // Yellow light duration: 5 seconds = 5 / (62.5 * 10^-9)  = 80,000,000 cycles
+    parameter GREEN_CYCLES  = 32'd480_000_000;
+    parameter YELLOW_CYCLES = 32'd80_000_000;
 
     // State registers to hold the current and next state of the state machine.
     reg [1:0] state, next_state;
@@ -74,7 +70,7 @@ module traffic_light (
     always @(posedge clk) begin
         // On each clock cycle, the current state is updated with the next state.
         state <= next_state;
-        
+
         // If the state changes, reset the counter. Otherwise, increment it.
         if (state != next_state) begin
             counter <= 32'd0;
@@ -86,7 +82,7 @@ module traffic_light (
     // Combinational logic to determine the next state based on the current state and the counter.
     always @(*) begin
         // By default, the next state is the same as the current state.
-        next_state = state; 
+        next_state = state;
         case (state)
             // If Light 1 is Green and its time is up, switch to Yellow.
             S_GREEN1_RED2: begin

@@ -8,7 +8,7 @@ The `traffic_light.v` module implements a finite state machine that controls two
 
 ### I/O Signals
 
-*   **Input:** `clk` - A 50 MHz clock signal.
+*   **Input:** `clk` - A 16 MHz clock signal.
 *   **Outputs for Traffic Light 1:**
     *   `red1`: Controls the red light (active high).
     *   `yellow1`: Controls the yellow light (active high).
@@ -29,4 +29,4 @@ The state machine has four states that control the lights for the two-way inters
 | `S_RED1_GREEN2`  | Red             | Green           | 30 seconds |
 | `S_RED1_YELLOW2` | Red             | Yellow          | 5 seconds  |
 
-A 32-bit counter is used to manage the timing for each state, based on the 50 MHz input clock. The controller initializes to the `S_RED1_GREEN2` state.
+A 32-bit counter is used to manage the timing for each state, based on the 16 MHz input clock. The controller initializes to the `S_RED1_GREEN2` state.

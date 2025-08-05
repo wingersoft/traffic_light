@@ -1,2 +1,11 @@
 *.vvp
 *.vcd
+*.pcf
+*.cmd
+*.dblite
+*.ini
+*.asc
+*.bin
+*.json
+*.pdf
+GEMINI.md
