@@ -8,4 +8,6 @@
 *.bin
 *.json
 *.pdf
+*.out
+*.dblite
 GEMINI.md

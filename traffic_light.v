@@ -1,12 +1,13 @@
 //-----------------------------------------------------------------------------
 //
 // Title       : traffic_light
-// Design      : traffic_light
-// Author      : HG and gemini
+// Design      : traffic_light - august 2025
+// Author      : HG and kimi-k2
 //
 //-----------------------------------------------------------------------------
 //
 // File        : traffic_light.v
+//
 //-----------------------------------------------------------------------------
 //
 // Description : Verilog module for a two-way traffic light controller.
@@ -33,10 +34,10 @@ module traffic_light (
 
     // State parameters define the four possible states of the traffic light system.
     // Each state represents a specific combination of lights for the two intersections.
-    parameter S_GREEN1_RED2    = 2'b00; // Light 1 is Green, Light 2 is Red
-    parameter S_YELLOW1_RED2   = 2'b01; // Light 1 is Yellow, Light 2 is Red
-    parameter S_RED1_GREEN2    = 2'b10; // Light 1 is Red, Light 2 is Green
-    parameter S_RED1_YELLOW2   = 2'b11; // Light 1 is Red, Light 2 is Yellow
+    parameter S_GREEN1_RED2    = 4'b0001; // Light 1 is Green, Light 2 is Red
+    parameter S_YELLOW1_RED2   = 4'b0010; // Light 1 is Yellow, Light 2 is Red
+    parameter S_RED1_GREEN2    = 4'b0100; // Light 1 is Red, Light 2 is Green
+    parameter S_RED1_YELLOW2   = 4'b1000; // Light 1 is Red, Light 2 is Yellow
 
     // Time duration parameters in clock cycles.
     // The system clock is 16 MHz, which means one clock cycle is 62.5 ns.
@@ -46,7 +47,7 @@ module traffic_light (
     parameter YELLOW_CYCLES = 32'd80_000_000;
 
     // State registers to hold the current and next state of the state machine.
-    reg [1:0] state, next_state;
+    reg [3:0] state, next_state;
 
     // Counter to time the duration of each state.
     reg [31:0] counter;
