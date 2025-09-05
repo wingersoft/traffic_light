@@ -25,7 +25,7 @@ module traffic_light_tb;
     // Override parameters for faster simulation
     defparam uut.GREEN_CYCLES = 30;
     defparam uut.YELLOW_CYCLES = 5;
-    defparam uut.RED_RED_CYCLES = 3;
+    defparam uut.RED_RED_CYCLES = 2;
 
     // Clock generation
     initial begin
@@ -65,8 +65,8 @@ module traffic_light_tb;
         // Wait for yellow cycles (5 cycles ~312ns) and check Red1 Red2
         #320 check_lights(1, 0, 0, 1, 0, 0);
 
-        // Wait for red-red cycles (3 cycles ~187ns) and check Green1 Red2
-        #200 check_lights(0, 0, 1, 1, 0, 0);
+        // Wait for red-red cycles (2 cycles ~125ns) and check Green1 Red2
+        #130 check_lights(0, 0, 1, 1, 0, 0);
 
         // Wait for green cycles and check Yellow1 Red2
         #1900 check_lights(0, 1, 0, 1, 0, 0);
@@ -74,8 +74,8 @@ module traffic_light_tb;
         // Wait for yellow cycles and check Red1 Red2
         #320 check_lights(1, 0, 0, 1, 0, 0);
 
-        // Wait for red-red cycles and check Red1 Green2
-        #200 check_lights(1, 0, 0, 0, 0, 1);
+        // Wait for red-red cycles (2 cycles ~125ns) and check Red1 Green2
+        #130 check_lights(1, 0, 0, 0, 0, 1);
 
         // Run for extended time and then stop
         #5000 $finish;
