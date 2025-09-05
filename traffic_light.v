@@ -32,10 +32,11 @@ module traffic_light (
     output reg green2         // Green light output
 );
 
-    // State parameters define the four possible states of the traffic light system.
+    // State parameters define the five possible states of the traffic light system.
     // Each state represents a specific combination of lights for the two intersections.
     parameter S_GREEN1_RED2    = 4'b0001; // Light 1 is Green, Light 2 is Red
     parameter S_YELLOW1_RED2   = 4'b0010; // Light 1 is Yellow, Light 2 is Red
+    parameter S_RED1_RED2      = 4'b0011; // Light 1 is Red, Light 2 is Red
     parameter S_RED1_GREEN2    = 4'b0100; // Light 1 is Red, Light 2 is Green
     parameter S_RED1_YELLOW2   = 4'b1000; // Light 1 is Red, Light 2 is Yellow
 
@@ -43,14 +44,19 @@ module traffic_light (
     // The system clock is 16 MHz, which means one clock cycle is 62.5 ns.
     // Green light duration: 30 seconds = 30 / (62.5 * 10^-9) = 480,000,000 cycles
     // Yellow light duration: 5 seconds = 5 / (62.5 * 10^-9)  = 80,000,000 cycles
+    // Both red duration: 2 seconds = 2 / (62.5 * 10^-9) = 32,000,000 cycles
     parameter GREEN_CYCLES  = 32'd480_000_000;
     parameter YELLOW_CYCLES = 32'd80_000_000;
+    parameter RED_RED_CYCLES = 32'd32_000_000;
 
     // State registers to hold the current and next state of the state machine.
     reg [3:0] state, next_state;
 
     // Counter to time the duration of each state.
     reg [31:0] counter;
+
+    // Direction flag to remember which yellow state led to both red.
+    reg direction; // 0: from S_YELLOW1_RED2, 1: from S_RED1_YELLOW2
 
     // Initialization block to set the initial state and outputs at the beginning of the simulation.
     initial begin
@@ -64,6 +70,8 @@ module traffic_light (
         green2  = 1'b1;
         // Initialize the counter to zero.
         counter = 32'd0;
+        // Initialize direction.
+        direction = 1'b0;
     end
 
     // This block handles state transitions and the master counter.
@@ -75,6 +83,11 @@ module traffic_light (
         // If the state changes, reset the counter. Otherwise, increment it.
         if (state != next_state) begin
             counter <= 32'd0;
+            // Set direction when entering both red state.
+            if (next_state == S_RED1_RED2) begin
+                if (state == S_YELLOW1_RED2) direction <= 1'b0;
+                else if (state == S_RED1_YELLOW2) direction <= 1'b1;
+            end
         end else begin
             counter <= counter + 1;
         end
@@ -91,10 +104,17 @@ module traffic_light (
                     next_state = S_YELLOW1_RED2;
                 end
             end
-            // If Light 1 is Yellow and its time is up, switch to Light 2 being Green.
+            // If Light 1 is Yellow and its time is up, switch to both Red.
             S_YELLOW1_RED2: begin
                 if (counter >= YELLOW_CYCLES - 1) begin
-                    next_state = S_RED1_GREEN2;
+                    next_state = S_RED1_RED2;
+                end
+            end
+            // If both are Red and time is up, switch based on direction.
+            S_RED1_RED2: begin
+                if (counter >= RED_RED_CYCLES - 1) begin
+                    if (direction == 1'b0) next_state = S_RED1_GREEN2;
+                    else next_state = S_GREEN1_RED2;
                 end
             end
             // If Light 2 is Green and its time is up, switch to Yellow.
@@ -103,10 +123,10 @@ module traffic_light (
                     next_state = S_RED1_YELLOW2;
                 end
             end
-            // If Light 2 is Yellow and its time is up, switch back to Light 1 being Green.
+            // If Light 2 is Yellow and its time is up, switch to both Red.
             S_RED1_YELLOW2: begin
                 if (counter >= YELLOW_CYCLES - 1) begin
-                    next_state = S_GREEN1_RED2;
+                    next_state = S_RED1_RED2;
                 end
             end
             // Default case to prevent latches, though all states are covered.
@@ -134,6 +154,15 @@ module traffic_light (
                 green1  <= 1'b0;
                 yellow1 <= 1'b1;
                 red1    <= 1'b0;
+                green2  <= 1'b0;
+                yellow2 <= 1'b0;
+                red2    <= 1'b1;
+            end
+            // State: Both lights are Red
+            S_RED1_RED2: begin
+                green1  <= 1'b0;
+                yellow1 <= 1'b0;
+                red1    <= 1'b1;
                 green2  <= 1'b0;
                 yellow2 <= 1'b0;
                 red2    <= 1'b1;
