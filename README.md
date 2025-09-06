@@ -122,15 +122,6 @@ make clean
 ├── traffic_light_tb.gtkw     # GTKWave configuration
 ├── Makefile                  # Build automation
 ├── README.md                 # This file
-├── AGENTS.md                 # Development guidelines
-└── .kilocode/
-    └── rules/
-        └── memory-bank/      # Project documentation
-            ├── brief.md      # Project overview
-            ├── product.md    # Purpose and goals
-            ├── context.md    # Current status
-            ├── architecture.md # Technical details
-            └── tech.md       # Development setup
 ```
 
 ## Testbench
@@ -168,15 +159,6 @@ The Makefile provides:
 - Cleanup operations
 - Dependency management
 
-## Documentation
-
-Comprehensive project documentation is available in the Memory Bank (`.kilocode/rules/memory-bank/`):
-
-- **brief.md**: Project overview and specifications
-- **product.md**: Purpose, problems solved, and goals
-- **context.md**: Current development status
-- **architecture.md**: Technical architecture details
-- **tech.md**: Development setup and tools
 
 ## Contributing
 
