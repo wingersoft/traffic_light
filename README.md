@@ -49,7 +49,7 @@ The controller uses a one-hot encoded finite state machine with five distinct st
 
 - **Clock**: 16 MHz input frequency (62.5 ns cycle time)
 - **Timing**: 32-bit counter supports durations up to ~268 seconds
-- **Encoding**: 4-bit one-hot state representation
+- **Encoding**: 5-bit one-hot state representation
 - **Outputs**: 6 control signals (3 per traffic light)
 - **Initialization**: Starts in `S_RED1_GREEN2` state
 
@@ -87,43 +87,6 @@ make view
 make clean
 ```
 
-### Detailed Workflow
-
-1. **Simulation**:
-   ```bash
-   make          # Compile and run
-   make run      # Run only (after compilation)
-   ```
-
-2. **Waveform Analysis**:
-   ```bash
-   make view     # Open GTKWave with saved configuration
-   ```
-
-3. **Single Test**:
-   ```bash
-   iverilog -o traffic_light.vvp traffic_light.v traffic_light_tb.v
-   vvp traffic_light.vvp
-   ```
-
-4. **FPGA Deployment** (with Apio):
-   ```bash
-   apio sim      # Run simulation
-   apio build    # Synthesize for FPGA
-   apio upload   # Program TinyFPGA-B2
-   ```
-
-## Project Structure
-
-```
-.
-├── traffic_light.v           # Main FSM controller module
-├── traffic_light_tb.v        # Comprehensive testbench
-├── traffic_light_tb.gtkw     # GTKWave configuration
-├── Makefile                  # Build automation
-├── README.md                 # This file
-```
-
 ## Testbench
 
 The testbench (`traffic_light_tb.v`) provides:
@@ -136,36 +99,9 @@ The testbench (`traffic_light_tb.v`) provides:
 ### Running Tests
 
 ```bash
-make                    # Full simulation with verification
+make                   # Full simulation with verification
 make view              # Analyze waveforms in GTKWave
 ```
-
-## Development
-
-### Coding Standards
-
-- **Modules**: `lowercase_underscore` naming
-- **Parameters**: `UPPERCASE_UNDERSCORE` constants
-- **States**: `S_STATE_NAME` format
-- **Signals**: `lowercase_underscore`
-- **Logic**: Separate combinational (`@*`) and sequential (`posedge clk`) blocks
-
-### Build System
-
-The Makefile provides:
-- Automated compilation
-- Simulation execution
-- Waveform generation
-- Cleanup operations
-- Dependency management
-
-
-## Contributing
-
-1. Follow the established coding standards
-2. Add tests for new features
-3. Update documentation as needed
-4. Ensure all simulations pass
 
 ## License
 
