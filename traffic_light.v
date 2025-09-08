@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
 //
-// Title       : traffic_light
-// Design      : traffic_light - august 2025
-// Author      : HG and kimi-k2
+// Title       : Traffic Light Controller
+// Design      : Two-Way Intersection Traffic Light System
+// Author      : Hans Grobler and kimi-k2
 //
 //-----------------------------------------------------------------------------
 //
@@ -10,16 +10,19 @@
 //
 //-----------------------------------------------------------------------------
 //
-// Description : Verilog module for a two-way traffic light controller.
-//               This module manages the state transitions and timings for
-//               two traffic lights at an intersection. The clock frequency
-//               is assumed to be 16 MHz.
+// Description : Verilog module implementing a finite state machine for a
+//               two-way traffic light controller. The controller manages
+//               state transitions and timings for two traffic lights at an
+//               intersection with safety interlocks. Features include normal
+//               operation mode and a yellow flash mode for maintenance.
+//               The system clock frequency is 16 MHz.
 //
 //-----------------------------------------------------------------------------
 
 module traffic_light (
     // Inputs
     input wire clk,           // 16 MHz clock input
+    input wire mode_switch,   // FPGA pin switch (low for flash mode)
 
     // Outputs for Traffic Light 1
     output reg red1,          // Red light output
@@ -42,12 +45,13 @@ module traffic_light (
 
     // Time duration parameters in clock cycles.
     // The system clock is 16 MHz, which means one clock cycle is 62.5 ns.
-    // Green light duration: 30 seconds = 30 / (62.5 * 10^-9) = 480,000,000 cycles
-    // Yellow light duration: 5 seconds = 5 / (62.5 * 10^-9)  = 80,000,000 cycles
-    // Both red duration: 2 seconds = 2 / (62.5 * 10^-9) = 32,000,000 cycles
+    // Green light duration: 30 seconds = 30 * 16,000,000 = 480,000 cycles
+    // Yellow light duration: 5 seconds = 5 * 16,000,000 = 80,000,000 cycles
+    // Both red duration: 2 seconds = 2 * 16,000,000 = 32,000,000 cycles
     parameter GREEN_CYCLES  = 32'd480_000_000;
     parameter YELLOW_CYCLES = 32'd80_000_000;
     parameter RED_RED_CYCLES = 32'd32_000_000;
+    parameter FLASH_HALF_CYCLES = 32'd16_000_000; // 1 second at 16 MHz (2 sec flash period)
 
     // State registers to hold the current and next state of the state machine.
     reg [4:0] state, next_state;
@@ -57,6 +61,9 @@ module traffic_light (
 
     // Direction flag to remember which yellow state led to both red.
     reg direction; // 0: from S_YELLOW1_RED2, 1: from S_RED1_YELLOW2
+
+    // Flash counter for yellow flash mode
+    reg [31:0] flash_counter;
 
     // Initialization block to set the initial state and outputs at the beginning of the simulation.
     initial begin
@@ -72,24 +79,34 @@ module traffic_light (
         counter = 32'd0;
         // Initialize direction.
         direction = 1'b0;
+        // Initialize flash counter
+        flash_counter = 32'd0;
     end
 
     // This block handles state transitions and the master counter.
     // It is synchronized with the positive edge of the clock.
     always @(posedge clk) begin
-        // On each clock cycle, the current state is updated with the next state.
-        state <= next_state;
+        if (mode_switch) begin
+            // On each clock cycle, the current state is updated with the next state.
+            state <= next_state;
 
-        // If the state changes, reset the counter. Otherwise, increment it.
-        if (state != next_state) begin
-            counter <= 32'd0;
-            // Set direction when entering both red state.
-            if (next_state == S_RED1_RED2) begin
-                if (state == S_YELLOW1_RED2) direction <= 1'b0;
-                else if (state == S_RED1_YELLOW2) direction <= 1'b1;
+            // If the state changes, reset the counter. Otherwise, increment it.
+            if (state != next_state) begin
+                counter <= 32'd0;
+                // Set direction when entering both red state.
+                if (next_state == S_RED1_RED2) begin
+                    if (state == S_YELLOW1_RED2) direction <= 1'b0;
+                    else if (state == S_RED1_YELLOW2) direction <= 1'b1;
+                end
+            end else begin
+                counter <= counter + 1;
             end
         end else begin
-            counter <= counter + 1;
+            // Flash mode: increment flash counter and reset periodically
+            flash_counter <= flash_counter + 1;
+            if (flash_counter >= 2 * FLASH_HALF_CYCLES - 1) begin
+                flash_counter <= 32'd0;
+            end
         end
     end
 
@@ -139,64 +156,74 @@ module traffic_light (
     // This block updates the output signals (the lights) based on the current state.
     // It is synchronized with the positive edge of the clock to ensure stable outputs.
     always @(posedge clk) begin
-        case (state)
-            // State: Light 1 is Green, Light 2 is Red
-            S_GREEN1_RED2: begin
-                green1  <= 1'b1;
-                yellow1 <= 1'b0;
-                red1    <= 1'b0;
-                green2  <= 1'b0;
-                yellow2 <= 1'b0;
-                red2    <= 1'b1;
-            end
-            // State: Light 1 is Yellow, Light 2 is Red
-            S_YELLOW1_RED2: begin
-                green1  <= 1'b0;
-                yellow1 <= 1'b1;
-                red1    <= 1'b0;
-                green2  <= 1'b0;
-                yellow2 <= 1'b0;
-                red2    <= 1'b1;
-            end
-            // State: Both lights are Red
-            S_RED1_RED2: begin
-                green1  <= 1'b0;
-                yellow1 <= 1'b0;
-                red1    <= 1'b1;
-                green2  <= 1'b0;
-                yellow2 <= 1'b0;
-                red2    <= 1'b1;
-            end
-            // State: Light 1 is Red, Light 2 is Green
-            S_RED1_GREEN2: begin
-                green1  <= 1'b0;
-                yellow1 <= 1'b0;
-                red1    <= 1'b1;
-                green2  <= 1'b1;
-                yellow2 <= 1'b0;
-                red2    <= 1'b0;
-            end
-            // State: Light 1 is Red, Light 2 is Yellow
-            S_RED1_YELLOW2: begin
-                green1  <= 1'b0;
-                yellow1 <= 1'b0;
-                red1    <= 1'b1;
-                green2  <= 1'b0;
-                yellow2 <= 1'b1;
-                red2    <= 1'b0;
-            end
-            // Default case to ensure all lights are in a safe state (e.g., all red)
-            // in case of an undefined state.
-            default: begin
-                // In case of an undefined state, default to both red for safety
-                green1  <= 1'b0;
-                yellow1 <= 1'b0;
-                red1    <= 1'b1;
-                green2  <= 1'b0;
-                yellow2 <= 1'b0;
-                red2    <= 1'b1;
-            end
-        endcase
+        if (mode_switch) begin
+            case (state)
+                // State: Light 1 is Green, Light 2 is Red
+                S_GREEN1_RED2: begin
+                    green1  <= 1'b1;
+                    yellow1 <= 1'b0;
+                    red1    <= 1'b0;
+                    green2  <= 1'b0;
+                    yellow2 <= 1'b0;
+                    red2    <= 1'b1;
+                end
+                // State: Light 1 is Yellow, Light 2 is Red
+                S_YELLOW1_RED2: begin
+                    green1  <= 1'b0;
+                    yellow1 <= 1'b1;
+                    red1    <= 1'b0;
+                    green2  <= 1'b0;
+                    yellow2 <= 1'b0;
+                    red2    <= 1'b1;
+                end
+                // State: Both lights are Red
+                S_RED1_RED2: begin
+                    green1  <= 1'b0;
+                    yellow1 <= 1'b0;
+                    red1    <= 1'b1;
+                    green2  <= 1'b0;
+                    yellow2 <= 1'b0;
+                    red2    <= 1'b1;
+                end
+                // State: Light 1 is Red, Light 2 is Green
+                S_RED1_GREEN2: begin
+                    green1  <= 1'b0;
+                    yellow1 <= 1'b0;
+                    red1    <= 1'b1;
+                    green2  <= 1'b1;
+                    yellow2 <= 1'b0;
+                    red2    <= 1'b0;
+                end
+                // State: Light 1 is Red, Light 2 is Yellow
+                S_RED1_YELLOW2: begin
+                    green1  <= 1'b0;
+                    yellow1 <= 1'b0;
+                    red1    <= 1'b1;
+                    green2  <= 1'b0;
+                    yellow2 <= 1'b1;
+                    red2    <= 1'b0;
+                end
+                // Default case to ensure all lights are in a safe state (e.g., all red)
+                // in case of an undefined state.
+                default: begin
+                    // In case of an undefined state, default to both red for safety
+                    green1  <= 1'b0;
+                    yellow1 <= 1'b0;
+                    red1    <= 1'b1;
+                    green2  <= 1'b0;
+                    yellow2 <= 1'b0;
+                    red2    <= 1'b1;
+                end
+            endcase
+        end else begin
+            // Yellow flash mode: all lights off except flashing yellows
+            green1  <= 1'b0;
+            yellow1 <= (flash_counter < FLASH_HALF_CYCLES) ? 1'b1 : 1'b0;
+            red1    <= 1'b0;
+            green2  <= 1'b0;
+            yellow2 <= (flash_counter < FLASH_HALF_CYCLES) ? 1'b1 : 1'b0;
+            red2    <= 1'b0;
+        end
     end
 
 endmodule

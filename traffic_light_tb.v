@@ -6,14 +6,21 @@ module traffic_light_tb;
 
     // Inputs
     reg clk;
+    reg mode_switch;
 
     // Outputs
     wire red1, yellow1, green1;
     wire red2, yellow2, green2;
 
     // Instantiate the module under test (UUT)
-    traffic_light uut (
+    traffic_light #(
+        .GREEN_CYCLES(30),
+        .YELLOW_CYCLES(5),
+        .RED_RED_CYCLES(2),
+        .FLASH_HALF_CYCLES(5) // Slower flash for simulation visibility (5 cycles = ~312.5 ns half-period)
+    ) uut (
         .clk(clk),
+        .mode_switch(mode_switch),
         .red1(red1),
         .yellow1(yellow1),
         .green1(green1),
@@ -21,11 +28,6 @@ module traffic_light_tb;
         .yellow2(yellow2),
         .green2(green2)
     );
-
-    // Override parameters for faster simulation
-    defparam uut.GREEN_CYCLES = 30;
-    defparam uut.YELLOW_CYCLES = 5;
-    defparam uut.RED_RED_CYCLES = 2;
 
     // Clock generation
     initial begin
@@ -56,9 +58,25 @@ module traffic_light_tb;
         $dumpfile("traffic_light_tb.vcd");
         $dumpvars(0, traffic_light_tb);
 
+        // Initialize mode switch
+        mode_switch = 1'b1;
+
         // Initial state check (should be Red1, Green2)
         #10 check_lights(1, 0, 0, 0, 0, 1);
 
+        // Test flash mode
+        #100;
+        mode_switch = 1'b0; // Enter flash mode
+        #100 check_lights(0, 1, 0, 0, 1, 0); // Yellows should be on, others off
+        #350 check_lights(0, 0, 0, 0, 0, 0); // Yellows should be off
+        #350 check_lights(0, 1, 0, 0, 1, 0); // Yellows should be on again
+        #10000
+        // Resume normal operation, should be back at initial state
+        mode_switch = 1'b1;
+        #100; // allow it to stabilize
+        check_lights(1, 0, 0, 0, 0, 1); // Back to Red1, Green2
+
+        // Now run through a full normal cycle from the start
         // Wait for green cycles (30 cycles ~1875ns) and check Red1 Yellow2
         #1900 check_lights(1, 0, 0, 0, 1, 0);
 
@@ -77,7 +95,7 @@ module traffic_light_tb;
         // Wait for red-red cycles (2 cycles ~125ns) and check Red1 Green2
         #130 check_lights(1, 0, 0, 0, 0, 1);
 
-        // Run for extended time and then stop
+        // Run for a bit longer to ensure stability
         #5000 $finish;
     end
 

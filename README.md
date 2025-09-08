@@ -6,12 +6,15 @@ A comprehensive traffic light controller for two-way intersections, implemented 
 
 This project implements a reliable traffic light controller that manages state transitions and timing for two traffic lights at an intersection. The controller ensures safe and efficient traffic flow through carefully designed state transitions and includes multiple safety features to prevent accidents during light changes.
 
+The system also includes a maintenance mode with yellow flash functionality, activated via a mode switch input.
+
 ### Key Features
 
 - **Finite State Machine**: 5-state FSM with one-hot encoding for reliability
 - **Safety First**: Both-red state during all transitions to prevent accidents
 - **Precise Timing**: 32-bit counter with 16MHz clock for accurate state durations
 - **Direction Tracking**: Intelligent state management remembers transition history
+- **Maintenance Mode**: Yellow flash mode for maintenance situations
 - **FPGA Ready**: Compatible with TinyFPGA-B2 for hardware deployment
 - **Comprehensive Testing**: Full testbench with automated verification
 
@@ -51,12 +54,14 @@ The controller uses a one-hot encoded finite state machine with five distinct st
 - **Timing**: 32-bit counter supports durations up to ~268 seconds
 - **Encoding**: 5-bit one-hot state representation
 - **Outputs**: 6 control signals (3 per traffic light)
+- **Inputs**: Clock and mode switch for maintenance mode
 - **Initialization**: Starts in `S_RED1_GREEN2` state
 
 ## I/O Signals
 
 ### Inputs
 - `clk`: 16 MHz system clock
+- `mode_switch`: FPGA pin switch (high for normal operation, low for flash mode)
 
 ### Outputs
 **Traffic Light 1:**
@@ -64,6 +69,10 @@ The controller uses a one-hot encoded finite state machine with five distinct st
 
 **Traffic Light 2:**
 - `red2`, `yellow2`, `green2`: Light control signals (active high)
+
+### Maintenance Mode
+
+When the `mode_switch` input is low, the system enters maintenance mode where both yellow lights flash at a 1Hz rate (1 second on, 1 second off). When the mode switch returns to high, the system resumes normal operation starting from the `S_RED1_GREEN2` state.
 
 ## Prerequisites
 
@@ -95,6 +104,7 @@ The testbench (`traffic_light_tb.v`) provides:
 - Light output monitoring
 - Timing validation
 - VCD file generation for waveform analysis
+- Maintenance mode testing
 
 ### Running Tests
 
@@ -108,5 +118,4 @@ make view              # Analyze waveforms in GTKWave
 This project is open source and available under standard terms.
 
 ---
-
 **Note**: This implementation is designed for educational and demonstration purposes. For real-world deployment, additional safety certifications and testing would be required.
