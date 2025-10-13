@@ -74,43 +74,20 @@ The controller uses a one-hot encoded finite state machine with five distinct st
 
 When the `mode_switch` input is low, the system enters maintenance mode where both yellow lights flash at a 1Hz rate (1 second on, 1 second off). When the mode switch returns to high, the system resumes normal operation starting from the `S_RED1_GREEN2` state.
 
-## Prerequisites
-
-- **Icarus Verilog** (iverilog) - Verilog compiler and simulator
-- **GTKWave** - Waveform viewer for signal analysis
-- **GNU Make** - Build automation
-- **Apio** (optional) - FPGA development toolchain
-
 ## Usage
 
-### Quick Start
+This project is intended for use with the Apio FPGA development toolchain.
 
 ```bash
-# Compile and run simulation
-make
+# Install apio
+pip install apio
 
-# View waveforms
-make view
+# Run simulation
+apio sim
 
-# Clean generated files
-make clean
-```
-
-## Testbench
-
-The testbench (`traffic_light_tb.v`) provides:
-- 16 MHz clock generation
-- Automated state transition verification
-- Light output monitoring
-- Timing validation
-- VCD file generation for waveform analysis
-- Maintenance mode testing
-
-### Running Tests
-
-```bash
-make                   # Full simulation with verification
-make view              # Analyze waveforms in GTKWave
+# Synthesize and upload to FPGA
+apio build
+apio upload
 ```
 
 ## License

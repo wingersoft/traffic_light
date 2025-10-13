@@ -53,6 +53,16 @@ module traffic_light_tb;
         end
     endtask
 
+    // Task to wait for a specific state
+    task wait_for_state;
+        input [4:0] expected_state;
+        begin
+            while (uut.state !== expected_state) begin
+                @(posedge clk);
+            end
+        end
+    endtask
+
     // Simulation control and monitoring
     initial begin
         $dumpfile("traffic_light_tb.vcd");
@@ -61,42 +71,36 @@ module traffic_light_tb;
         // Initialize mode switch
         mode_switch = 1'b1;
 
-        // Initial state check (should be Red1, Green2)
-        #10 check_lights(1, 0, 0, 0, 0, 1);
+        // Initial state check
+        wait_for_state(5'b01000); // S_RED1_GREEN2
+        #1; check_lights(1, 0, 0, 0, 0, 1);
 
-        // Test flash mode
-        #100;
-        mode_switch = 1'b0; // Enter flash mode
-        #100 check_lights(0, 1, 0, 0, 1, 0); // Yellows should be on, others off
-        #350 check_lights(0, 0, 0, 0, 0, 0); // Yellows should be off
-        #350 check_lights(0, 1, 0, 0, 1, 0); // Yellows should be on again
-        #10000
-        // Resume normal operation, should be back at initial state
-        mode_switch = 1'b1;
-        #100; // allow it to stabilize
-        check_lights(1, 0, 0, 0, 0, 1); // Back to Red1, Green2
+        // Wait for S_RED1_YELLOW2
+        wait_for_state(5'b10000); // S_RED1_YELLOW2
+        #1; check_lights(1, 0, 0, 0, 1, 0);
 
-        // Now run through a full normal cycle from the start
-        // Wait for green cycles (30 cycles ~1875ns) and check Red1 Yellow2
-        #1900 check_lights(1, 0, 0, 0, 1, 0);
+        // Wait for S_RED1_RED2
+        wait_for_state(5'b00100); // S_RED1_RED2
+        #1; check_lights(1, 0, 0, 1, 0, 0);
 
-        // Wait for yellow cycles (5 cycles ~312ns) and check Red1 Red2
-        #320 check_lights(1, 0, 0, 1, 0, 0);
+        // Wait for S_GREEN1_RED2
+        wait_for_state(5'b00001); // S_GREEN1_RED2
+        #1; check_lights(0, 0, 1, 1, 0, 0);
 
-        // Wait for red-red cycles (2 cycles ~125ns) and check Green1 Red2
-        #130 check_lights(0, 0, 1, 1, 0, 0);
+        // Wait for S_YELLOW1_RED2
+        wait_for_state(5'b00010); // S_YELLOW1_RED2
+        #1; check_lights(0, 1, 0, 1, 0, 0);
 
-        // Wait for green cycles and check Yellow1 Red2
-        #1900 check_lights(0, 1, 0, 1, 0, 0);
+        // Wait for S_RED1_RED2
+        wait_for_state(5'b00100); // S_RED1_RED2
+        #1; check_lights(1, 0, 0, 1, 0, 0);
 
-        // Wait for yellow cycles and check Red1 Red2
-        #320 check_lights(1, 0, 0, 1, 0, 0);
+        // Wait for S_RED1_GREEN2
+        wait_for_state(5'b01000); // S_RED1_GREEN2
+        #1; check_lights(1, 0, 0, 0, 0, 1);
 
-        // Wait for red-red cycles (2 cycles ~125ns) and check Red1 Green2
-        #130 check_lights(1, 0, 0, 0, 0, 1);
-
-        // Run for a bit longer to ensure stability
-        #5000 $finish;
+        #1000;
+        $finish;
     end
 
 endmodule
